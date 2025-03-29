@@ -21,6 +21,7 @@
 
 void GPIO_Init(void);
 void TIM2_PWM_Init(void);
+void delay_ms(uint32_t ms);
 void LED_Dimming(uint32_t step);
 
 int main(void)
@@ -32,13 +33,17 @@ int main(void)
 
     while (1)
     {
-    	LED_Dimming(10);
+        LED_Dimming(10);
     }
 }
 
 void GPIO_Init(void)
 {
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN_MASK;
 
+    GPIOA->CRL &= ~(GPIO_CRL_MODE0_MASK | GPIO_CRL_CNF0_MASK);
+    GPIOA->CRL |= GPIO_CRL_MODE0(2);        /* Output mode, max speed 2MHz */
+    GPIOA->CRL |= GPIO_CRL_CNF0(2);         /* Alternate function output push-pull */
 }
 
 void TIM2_PWM_Init(void)
@@ -46,27 +51,68 @@ void TIM2_PWM_Init(void)
     /* Enable clock for TIM2 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN(1u);
 
-    /**
-     * Setup clock frequency for TIM2. When POR (power of reset):
-     * RCC_CR:      Reset value: 0x0000 XX83:   HSION and HSIRDY -> clock source is HSI (8MHz)
-     * RCC_CFRG:    Reset value: 0x0
-     *      + PLLSRC = 0 -> HSI oscillator clock / 2 selected as PLL input clock (4MHz)
-     *      + PLLMUL = 0 -> PLL input clock * 2 (8MHz)
-     *      + SW = 0 ->  HSI selected as system clock (8MHz)
-     *      + HPRE = 0 -> SYSCLK not divided
-     *      + PPRE1 = 0 -> HCLK not divided
-     * Summary: PCLK1 = 8MHz
-     */
-
     /* Set PSR = 7 -> Fclock = CK_PSC / (PSC[15:0] + 1) = 8 / (7 + 1) = 1MHz */
     TIM2->PSC = TIM_PSC_PSC(7u);
-    TIM2->ARR = TIM_ARR_ARR(0xFFFFu);
+    /* PWM period: 1 MHz / 1000 = 1 kHz */
+    TIM2->ARR = TIM_ARR_ARR(1000 - 1);
+    /* CCR = 0: start with duty cycle = 0 */
+    TIM2->CCR1 = 0;
+
+    /* Select PWM mode 1 */
+    TIM2->CCMR1 &= ~TIM_CCMR1_OC1M_MASK;
+    TIM2->CCMR1 |= TIM_CCMR1_OC1M(6);
+
+    /* Enable corresponding preload register */
+    TIM2->CCMR1 |= TIM_CCMR1_OC1PE_MASK;
+    /* Enable auto-reload preload register */
+    TIM2->CR1 |= TIM_CR1_ARPE_MASK;
+
+    /**
+     * the preload register is tranferred for shadow register only
+     * when an update event occur, so need to enable UG: update generation
+     */
+    TIM2->EGR |= TIM_EGR_UG_MASK;
+
+    /* Configure OC1 become output channel */
+    TIM2->CCER |= TIM_CCER_CC1E_MASK;
+    /* Configure OC1 output polarity as active high */
+    TIM2->CCER &= TIM_CCER_CC1P_MASK;
+
+    /* Configure counter as Edge-aligned mode */
+    TIM2->CR1 &= ~TIM_CR1_CMS_MASK;
+    /* Configure direction as upcounter */
+    TIM2->CR1 &= ~TIM_CR1_DIR_MASK;
 
     /* Enable counter */
     TIM2->CR1 |= TIM_CR1_CEN(1u);
 }
 
+void delay_ms(uint32_t ms)
+{
+    uint32_t i;
+
+    for (i = 0; i < ms * 4000; i++)
+    {
+    	__asm__("nop");  /* No operation */
+    }
+}
+
 void LED_Dimming(uint32_t step)
 {
+    uint16_t i;
 
+    /* Fade in (0% to 100%) */
+    for (i = 0; i <= 1000; i += 10)
+    {
+        TIM2->CCR1 = i;
+        delay_ms(10);
+    }
+
+    /* Fade out (100% to 0%) */
+    for (i = 1000; i > 0; i -= 10)
+    {
+        TIM2->CCR1 = i;
+        delay_ms(10);
+    }
 }
+
