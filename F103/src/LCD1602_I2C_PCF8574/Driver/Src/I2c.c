@@ -12,6 +12,7 @@ void I2C_Init(void)
 {
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN_MASK;    /* Enable clock for I2C1 */
 
+    /* Enable software -reset for I2C module */
     I2C1->CR1 |= (1 << 15);
     I2C1->CR1 &= ~(1 << 15);
 
