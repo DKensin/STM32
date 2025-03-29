@@ -76,7 +76,7 @@ void TIM2_PWM_Init(void)
     /* Configure OC1 become output channel */
     TIM2->CCER |= TIM_CCER_CC1E_MASK;
     /* Configure OC1 output polarity as active high */
-    TIM2->CCER &= TIM_CCER_CC1P_MASK;
+    TIM2->CCER &= ~TIM_CCER_CC1P_MASK;
 
     /* Configure counter as Edge-aligned mode */
     TIM2->CR1 &= ~TIM_CR1_CMS_MASK;
@@ -102,17 +102,17 @@ void LED_Dimming(uint32_t step)
     uint16_t i;
 
     /* Fade in (0% to 100%) */
-    for (i = 0; i <= 1000; i += 10)
+    for (i = 0; i <= 1000; i += step)
     {
         TIM2->CCR1 = i;
-        delay_ms(10);
+        delay_ms(1);
     }
 
     /* Fade out (100% to 0%) */
-    for (i = 1000; i > 0; i -= 10)
+    for (i = 1000; i > 0; i -= step)
     {
         TIM2->CCR1 = i;
-        delay_ms(10);
+        delay_ms(1);
     }
 }
 
