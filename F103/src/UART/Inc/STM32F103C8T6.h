@@ -65,6 +65,10 @@ typedef struct
 #define RCC_APB2ENR_IOPAEN_MASK     (0x4u)
 #define RCC_APB2ENR_IOPAEN(x)       (((x) << RCC_APB2ENR_IOPAEN_SHIFT) & (RCC_APB2ENR_IOPAEN_MASK))
 
+#define RCC_APB2ENR_USART1EN_SHIFT  (14u)
+#define RCC_APB2ENR_USART1EN_MASK   (0x4000u)
+#define RCC_APB2ENR_USART1EN(x)     (((x) << RCC_APB2ENR_USART1EN_SHIFT) & (RCC_APB2ENR_USART1EN_MASK))
+
 #define RCC_CFGR2_PREDIV1_SHIFT     (0u)
 #define RCC_CFGR2_PREDIV1_MASK      (0xFu)
 #define RCC_CFGR2_PREDIV1(x)        (((x) << RCC_CFGR2_PREDIV1_SHIFT) & (RCC_CFGR2_PREDIV1_MASK))
@@ -102,6 +106,22 @@ typedef struct
 #define GPIO_CRL_CNF0_MASK          (0xCu)
 #define GPIO_CRL_CNF0(x)            (((x) << GPIO_CRL_CNF0_SHIFT) & (GPIO_CRL_CNF0_MASK))
 
+#define GPIO_CRH_MODE9_SHIFT        (4u)
+#define GPIO_CRH_MODE9_MASK         (0x30u)
+#define GPIO_CRH_MODE9(x)           (((x) << GPIO_CRH_MODE9_SHIFT) & (GPIO_CRH_MODE9_MASK))
+
+#define GPIO_CRH_CNF9_SHIFT         (6u)
+#define GPIO_CRH_CNF9_MASK          (0xC0u)
+#define GPIO_CRH_CNF9(x)            (((x) << GPIO_CRH_CNF9_SHIFT) & (GPIO_CRH_CNF9_MASK))
+
+#define GPIO_CRH_MODE10_SHIFT       (8u)
+#define GPIO_CRH_MODE10_MASK        (0x300u)
+#define GPIO_CRH_MODE10(x)          (((x) << GPIO_CRH_MODE10_SHIFT) & (GPIO_CRH_MODE10_MASK))
+
+#define GPIO_CRH_CNF10_SHIFT        (10u)
+#define GPIO_CRH_CNF10_MASK         (0xC00u)
+#define GPIO_CRH_CNF10(x)           (((x) << GPIO_CRH_CNF10_SHIFT) & (GPIO_CRH_CNF10_MASK))
+
 #define GPIO_CRH_MODE13_SHIFT       (20u)
 #define GPIO_CRH_MODE13_MASK        (0x300000u)
 #define GPIO_CRH_MODE13(x)          (((x) << GPIO_CRH_MODE13_SHIFT) & (GPIO_CRH_MODE13_MASK))
@@ -123,5 +143,54 @@ typedef struct
  *******************************************************************************************************************
  */
 
+ typedef struct
+{
+    uint32_t SR;
+    uint32_t DR;
+    uint32_t BRR;
+    uint32_t CR1;
+    uint32_t CR2;
+    uint32_t CR3;
+    uint32_t GTPR;
+} UART_Type;
+
+#define USART1_BASE                 (0x40013800u)
+#define USART1                      ((UART_Type *)USART1_BASE)
+
+#define UART_SR_TC_SHIFT            (6u)
+#define UART_SR_TC_MASK             (0x40u)
+#define UART_SR_TC(x)               (((x) << UART_SR_TC_SHIFT) & (UART_SR_TC_MASK))
+
+#define UART_SR_TXE_SHIFT           (7u)
+#define UART_SR_TXE_MASK            (0x80u)
+#define UART_SR_TXE(x)              (((x) << UART_SR_TXE_SHIFT) & (UART_SR_TXE_MASK))
+
+#define UART_BRR_FRAC_SHIFT         (0u)
+#define UART_BRR_FRAC_MASK          (0xFu)
+#define UART_BRR_FRAC(x)            (((x) << UART_BRR_FRAC_SHIFT) & (UART_BRR_FRAC_MASK))
+
+#define UART_BRR_MANTISSA_SHIFT     (4u)
+#define UART_BRR_MANTISSA_MASK      (0xFFF0u)
+#define UART_BRR_MANTISSA(x)        (((x) << UART_BRR_MANTISSA_SHIFT) & (UART_BRR_MANTISSA_MASK))
+
+#define UART_CR1_RE_SHIFT           (2u)
+#define UART_CR1_RE_MASK            (0x4u)
+#define UART_CR1_RE(x)              (((x) << UART_CR1_RE_SHIFT) & (UART_CR1_RE_MASK))
+
+#define UART_CR1_TE_SHIFT           (3u)
+#define UART_CR1_TE_MASK            (0x8u)
+#define UART_CR1_TE(x)              (((x) << UART_CR1_TE_SHIFT) & (UART_CR1_TE_MASK))
+
+#define UART_CR1_PCE_SHIFT          (10u)
+#define UART_CR1_PCE_MASK           (0x400u)
+#define UART_CR1_PCE(x)             (((x) << UART_CR1_PCE_SHIFT) & (UART_CR1_PCE_MASK))
+
+#define UART_CR1_M_SHIFT            (12u)
+#define UART_CR1_M_MASK             (0x1000u)
+#define UART_CR1_M(x)               (((x) << UART_CR1_M_SHIFT) & (UART_CR1_M_MASK))
+
+#define UART_CR1_UE_SHIFT            (13u)
+#define UART_CR1_UE_MASK             (0x2000u)
+#define UART_CR1_UE(x)               (((x) << UART_CR1_UE_SHIFT) & (UART_CR1_UE_MASK))
 
 #endif /* _STM32F103C8T6_H__ */

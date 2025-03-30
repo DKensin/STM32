@@ -19,24 +19,47 @@
 
 #include "STM32F103C8T6.h"
 
+uint32_t str_len(uint8_t str[]);
+
 void sys_init(void);
 void GPIO_Init(void);
-void UART_Init();
-void UART_SendCharacter(uint8_t data);
+void UART_Init(void);
+void UART_SendCharacter(uint8_t character);
 void UART_SendString(uint8_t str[], uint32_t len);
 
 int main(void)
 {
-
+    uint8_t str[] = "Hello, Kensin";
     /* Set up SYSTEM clock with Fmax = 72 MHz */
     sys_init();
+    /**
+     * Setup USART1 for RX and TX pin
+     * PA9:  USART1_TX: ALT push-pull
+     * PA10: USART1_RX: input floating, because CP2102 already has pull-up register
+     */
     GPIO_Init();
+
+    UART_Init();
+
+    UART_SendString(str, str_len(str));
 
 
     while (1)
     {
 
     }
+}
+
+uint32_t str_len(uint8_t str[])
+{
+    uint32_t len = 0;
+
+    while ('\0' != str[len])
+    {
+        len++;
+    }
+
+    return len;
 }
 
 void sys_init()
@@ -79,5 +102,62 @@ void sys_init()
 
 void GPIO_Init(void)
 {
+    /* Enable clock for port A */
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN_MASK;
 
+    /* PA9: ALT output push-pull */
+    GPIOA->CRH &= ~(GPIO_CRH_MODE9_MASK | GPIO_CRH_CNF9_MASK);
+    GPIOA->CRH |= GPIO_CRH_MODE9(2u);       /* output, max speed 2MHz */
+    GPIOA->CRH |= GPIO_CRH_CNF9(2u);        /* ALT output push-pull */
+
+    /* PA10: input floating point */
+    GPIOA->CRH &= ~GPIO_CRH_MODE10_MASK;    /* input mode */
+    GPIOA->CRH &= ~GPIO_CRH_CNF10_MASK;
+    GPIOA->CRH |= GPIO_CRH_CNF10(1u);       /* floating input */
+}
+
+void UART_Init(void)
+{
+    /* Enable clock for USART1 */
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN_MASK;
+
+    /**
+     * USART1: belongs to APB2: max = 72 MHz
+     * Configure baudrate = 9600 bps
+     * By RM: TX/RX baud = Fclk / (16 * USARTDIV)
+     * 9600 = 72 Mhz / (16 * USARTDIV) => USARTDIV = 468.75
+     * Mantissa = 468
+     * Fraction = 0.75 * 16 = 12
+     */
+    USART1->BRR = 72000000u / 9600u;
+
+    // USART1->BRR |= UART_BRR_FRAC(12);
+    // USART1->BRR |= UART_BRR_MANTISSA(468);
+
+    USART1->CR1 &= ~UART_CR1_M_MASK;        /* word len = 8 bits */
+    USART1->CR1 &= ~UART_CR1_PCE_MASK;      /* disable parity */
+
+    USART1->CR1 |= UART_CR1_TE_MASK;        /* transmitter enable */
+    USART1->CR1 |= UART_CR1_RE_MASK;        /* receiver enable */
+
+    USART1->CR1 |= UART_CR1_UE_MASK;        /* Enable UART */
+
+    /* Ensure all frame has complete */
+    while (!(USART1->SR & UART_SR_TC_MASK));
+}
+
+void UART_SendCharacter(uint8_t character)
+{
+    while (!(USART1->SR & UART_SR_TXE_MASK));       /* wait until TX buffer empty */
+    USART1->DR = character;
+}
+
+void UART_SendString(uint8_t str[], uint32_t len)
+{
+    uint32_t i;
+
+    for (i = 0; i <= len; i++)
+    {
+        UART_SendCharacter(str[i]);
+    }
 }
