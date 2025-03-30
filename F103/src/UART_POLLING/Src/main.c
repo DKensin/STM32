@@ -29,7 +29,7 @@ void UART_SendString(uint8_t str[], uint32_t len);
 
 int main(void)
 {
-    uint8_t str[] = "Hello, Kensin";
+    uint8_t str[] = "Hello, Kensin\n";
     /* Set up SYSTEM clock with Fmax = 72 MHz */
     sys_init();
     /**
@@ -72,32 +72,27 @@ void sys_init()
     RCC->CR |= RCC_CR_HSEON_MASK;               /* Enable HSE */
     while (!(RCC->CR & RCC_CR_HSERDY_MASK));    /* Wait HSE stable */
 
-    /* Select PREDIV1SRC is HSE */
-    RCC->CFGR2 &= ~RCC_CFGR2_PREDIV1SRC_MASK;
+    /* Configure PLL source */
+    RCC->CFGR2 &= ~RCC_CFGR2_PREDIV1SRC_MASK;   /* Select PREDIV1SRC is HSE */
+    RCC->CFGR2 &= ~RCC_CFGR2_PREDIV1_MASK;      /* Set PREDIV1 = 1 -> F = 8/1 = 8 */
+    RCC->CFGR |= RCC_CFGR_PLLSRC_MASK;          /* Select PLLSRC is PREDIV 1 */
 
-    /* Set PREDIV1 = 1 -> F = 8/1 = 8 */
-    RCC->CFGR2 &= ~RCC_CFGR2_PREDIV1_MASK;
-
-    /* Select PLLSRC is PREDIV 1 */
-    RCC->CFGR |= RCC_CFGR_PLLSRC_MASK;
-
-    /* Set PLLMUL = 9 -> F = 8 * 9 = 72 MHz */
+    /* Configure PLLMUL before enable PLL clock */
     RCC->CFGR &= ~RCC_CFGR_PLLMUL_MASK;
-    RCC->CFGR |= RCC_CFGR_PLLMUL(7u);
+    RCC->CFGR |= RCC_CFGR_PLLMUL(7u);           /* Set PLLMUL = 9 -> F = 8 * 9 = 72 MHz */
+
+    /* Enable PLL */
+    RCC->CR |= RCC_CR_PLLON_MASK;               /* Enable PLL */
+    while (!(RCC->CR & RCC_CR_PLLRDY_MASK));    /* Wait PLL stable */
+
+    RCC->CFGR &= ~RCC_CFGR_HPRE_MASK;           /* Set AHB prescaler = 1 */
+    RCC->CFGR &= ~RCC_CFGR_PPRE1_MASK;          /* Max PCLK1 is 36 MHz -> set APB1 prescale = 2 */
+    RCC->CFGR |= RCC_CFGR_PPRE1(4u);
+    RCC->CFGR &= ~RCC_CFGR_PPRE2_MASK;          /* Set APB2 prescaler = 1 */
 
     /* Select SYSCLOCK input is PLLSRC */
     RCC->CFGR &= ~RCC_CFGR_SW_MASK;
     RCC->CFGR |= RCC_CFGR_SW(2u);
-
-    /* Set AHB prescaler = 1 */
-    RCC->CFGR &= ~RCC_CFGR_HPRE_MASK;
-
-    /* Max PCLK1 is 36 MHz -> set APB1 prescale = 2 */
-    RCC->CFGR &= ~RCC_CFGR_PPRE1_MASK;
-    RCC->CFGR |= RCC_CFGR_PPRE1(4u);
-
-    /* Set APB2 prescaler = 1 */
-    RCC->CFGR &= ~RCC_CFGR_PPRE2_MASK;
 }
 
 void GPIO_Init(void)

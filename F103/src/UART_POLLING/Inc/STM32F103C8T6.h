@@ -33,6 +33,12 @@ typedef struct
 
 #define RCC_CR_HSERDY_MASK          (0x20000u)
 
+#define RCC_CR_PLLON_SHIFT          (24u)
+#define RCC_CR_PLLON_MASK           (0x1000000u)
+#define RCC_CR_PLLON(x)             (((x) << RCC_CR_PLLON_SHIFT) & (RCC_CR_PLLON_MASK))
+
+#define RCC_CR_PLLRDY_MASK          (0x2000000u)
+
 #define RCC_CFGR_SW_SHIFT           (0u)
 #define RCC_CFGR_SW_MASK            (0x3u)
 #define RCC_CFGR_SW(x)              (((x) << RCC_CFGR_SW_SHIFT) & (RCC_CFGR_SW_MASK))
