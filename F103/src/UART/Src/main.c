@@ -19,6 +19,7 @@
 
 #include "STM32F103C8T6.h"
 
+void sys_init(void);
 void GPIO_Init(void);
 void UART_Init();
 void UART_SendCharacter(uint8_t data);
@@ -27,6 +28,8 @@ void UART_SendString(uint8_t str[], uint32_t len);
 int main(void)
 {
 
+    /* Set up SYSTEM clock with Fmax = 72 MHz */
+    sys_init();
     GPIO_Init();
 
 
@@ -34,6 +37,44 @@ int main(void)
     {
 
     }
+}
+
+void sys_init()
+{
+    /**
+     * From schematic of Blue Pill, OSC_IN and OSC_OUT has Y2 = 8 MHz
+     * This is a clock source for HSE.
+     * So HSE in STM32F103 is 8 MHz
+     */
+    RCC->CR |= RCC_CR_HSEON_MASK;               /* Enable HSE */
+    while (!(RCC->CR & RCC_CR_HSERDY_MASK));    /* Wait HSE stable */
+
+    /* Select PREDIV1SRC is HSE */
+    RCC->CFGR2 &= ~RCC_CFGR2_PREDIV1SRC_MASK;
+
+    /* Set PREDIV1 = 1 -> F = 8/1 = 8 */
+    RCC->CFGR2 &= ~RCC_CFGR2_PREDIV1_MASK;
+
+    /* Select PLLSRC is PREDIV 1 */
+    RCC->CFGR |= RCC_CFGR_PLLSRC_MASK;
+
+    /* Set PLLMUL = 9 -> F = 8 * 9 = 72 MHz */
+    RCC->CFGR &= ~RCC_CFGR_PLLMUL_MASK;
+    RCC->CFGR |= RCC_CFGR_PLLMUL(7u);
+
+    /* Select SYSCLOCK input is PLLSRC */
+    RCC->CFGR &= ~RCC_CFGR_SW_MASK;
+    RCC->CFGR |= RCC_CFGR_SW(2u);
+
+    /* Set AHB prescaler = 1 */
+    RCC->CFGR &= ~RCC_CFGR_HPRE_MASK;
+
+    /* Max PCLK1 is 36 MHz -> set APB1 prescale = 2 */
+    RCC->CFGR &= ~RCC_CFGR_PPRE1_MASK;
+    RCC->CFGR |= RCC_CFGR_PPRE1(4u);
+
+    /* Set APB2 prescaler = 1 */
+    RCC->CFGR &= ~RCC_CFGR_PPRE2_MASK;
 }
 
 void GPIO_Init(void)

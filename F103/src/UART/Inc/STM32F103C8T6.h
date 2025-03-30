@@ -20,10 +20,42 @@ typedef struct
     uint32_t APB1ENR;
     uint32_t BDCR;
     uint32_t CSR;
+    uint32_t AHBSTR;
+    uint32_t CFGR2;
 } RCC_Type;
 
 #define RCC_BASE                    (0x40021000u)
 #define RCC                         ((RCC_Type *)RCC_BASE)
+
+#define RCC_CR_HSEON_SHIFT          (16u)
+#define RCC_CR_HSEON_MASK           (0x10000u)
+#define RCC_CR_HSEON(x)             (((x) << RCC_CR_HSEON_SHIFT) & (RCC_CR_HSEON_MASK))
+
+#define RCC_CR_HSERDY_MASK          (0x20000u)
+
+#define RCC_CFGR_SW_SHIFT           (0u)
+#define RCC_CFGR_SW_MASK            (0x3u)
+#define RCC_CFGR_SW(x)              (((x) << RCC_CFGR_SW_SHIFT) & (RCC_CFGR_SW_MASK))
+
+#define RCC_CFGR_HPRE_SHIFT         (4u)
+#define RCC_CFGR_HPRE_MASK          (0xF0u)
+#define RCC_CFGR_HPRE(x)            (((x) << RCC_CFGR_HPRE_SHIFT) & (RCC_CFGR_HPRE_MASK))
+
+#define RCC_CFGR_PPRE1_SHIFT        (8u)
+#define RCC_CFGR_PPRE1_MASK         (0x700u)
+#define RCC_CFGR_PPRE1(x)           (((x) << RCC_CFGR_PPRE1_SHIFT) & (RCC_CFGR_PPRE1_MASK))
+
+#define RCC_CFGR_PPRE2_SHIFT        (11u)
+#define RCC_CFGR_PPRE2_MASK         (0x3800u)
+#define RCC_CFGR_PPRE2(x)           (((x) << RCC_CFGR_PPRE2_SHIFT) & (RCC_CFGR_PPRE2_MASK))
+
+#define RCC_CFGR_PLLSRC_SHIFT       (16u)
+#define RCC_CFGR_PLLSRC_MASK        (0x10000u)
+#define RCC_CFGR_PLLSRC(x)          (((x) << RCC_CFGR_PLLSRC_SHIFT) & (RCC_CFGR_PLLSRC_MASK))
+
+#define RCC_CFGR_PLLMUL_SHIFT       (18u)
+#define RCC_CFGR_PLLMUL_MASK        (0x3C0000u)
+#define RCC_CFGR_PLLMUL(x)          (((x) << RCC_CFGR_PLLMUL_SHIFT) & (RCC_CFGR_PLLMUL_MASK))
 
 #define RCC_APB1ENR_TIM2EN_SHIFT    (0u)
 #define RCC_APB1ENR_TIM2EN_MASK     (0x1u)
@@ -32,6 +64,14 @@ typedef struct
 #define RCC_APB2ENR_IOPAEN_SHIFT    (2u)
 #define RCC_APB2ENR_IOPAEN_MASK     (0x4u)
 #define RCC_APB2ENR_IOPAEN(x)       (((x) << RCC_APB2ENR_IOPAEN_SHIFT) & (RCC_APB2ENR_IOPAEN_MASK))
+
+#define RCC_CFGR2_PREDIV1_SHIFT     (0u)
+#define RCC_CFGR2_PREDIV1_MASK      (0xFu)
+#define RCC_CFGR2_PREDIV1(x)        (((x) << RCC_CFGR2_PREDIV1_SHIFT) & (RCC_CFGR2_PREDIV1_MASK))
+
+#define RCC_CFGR2_PREDIV1SRC_SHIFT  (16u)
+#define RCC_CFGR2_PREDIV1SRC_MASK   (0x10000u)
+#define RCC_CFGR2_PREDIV1SRC(x)     (((x) << RCC_CFGR2_PREDIV1SRC_SHIFT) & (RCC_CFGR2_PREDIV1SRC_MASK))
 
 /*******************************************************************************************************************
  * Peripheral Hardware Access Layer for GPIO                                                                       *
