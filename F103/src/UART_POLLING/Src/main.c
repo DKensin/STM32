@@ -26,10 +26,12 @@ void GPIO_Init(void);
 void UART_Init(void);
 void UART_SendCharacter(uint8_t character);
 void UART_SendString(uint8_t str[], uint32_t len);
+uint8_t UART_ReceiverCharacter(void);
 
 int main(void)
 {
-    uint8_t str[] = "Hello, Kensin\n";
+    uint8_t c;
+
     /* Set up SYSTEM clock with Fmax = 72 MHz */
     sys_init();
     /**
@@ -41,12 +43,10 @@ int main(void)
 
     UART_Init();
 
-    UART_SendString(str, str_len(str));
-
-
     while (1)
     {
-
+        c = UART_ReceiverCharacter();
+        UART_SendCharacter(c);
     }
 }
 
@@ -155,4 +155,11 @@ void UART_SendString(uint8_t str[], uint32_t len)
     {
         UART_SendCharacter(str[i]);
     }
+}
+
+uint8_t UART_ReceiverCharacter(void)
+{
+    while (!(USART1->SR & UART_SR_RXNE_MASK));       /* wait until RX buffer full */
+
+    return (USART1->DR);
 }

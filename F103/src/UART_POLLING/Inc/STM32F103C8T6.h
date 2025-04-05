@@ -163,6 +163,10 @@ typedef struct
 #define USART1_BASE                 (0x40013800u)
 #define USART1                      ((UART_Type *)USART1_BASE)
 
+#define UART_SR_RXNE_SHIFT          (5u)
+#define UART_SR_RXNE_MASK           (0x20u)
+#define UART_SR_RXNE(x)             (((x) << UART_SR_RXNE_SHIFT) & (UART_SR_RXNE_MASK))
+
 #define UART_SR_TC_SHIFT            (6u)
 #define UART_SR_TC_MASK             (0x40u)
 #define UART_SR_TC(x)               (((x) << UART_SR_TC_SHIFT) & (UART_SR_TC_MASK))
